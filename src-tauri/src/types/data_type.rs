@@ -1,6 +1,6 @@
 use super::*;
 
-pub enum PinValue {
+pub enum DataValue {
     Number(f64),
     Boolean(bool),
     Color(color::Color),
