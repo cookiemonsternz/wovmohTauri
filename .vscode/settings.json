@@ -1,0 +1,5 @@
+{
+    "svelte.enable-ts-plugin": true,
+    "explorer.sortOrder": "modified",
+    "rust-analyzer.linkedProjects": ["src-tauri/Cargo.toml"]
+}

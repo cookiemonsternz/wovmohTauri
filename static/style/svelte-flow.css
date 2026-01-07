@@ -1,0 +1,14 @@
+@media (prefers-color-scheme: dark) {
+}
+
+.svelte-flow__background {
+    background-color: #282c34;
+}
+
+.svelte-flow__node {
+    background-color: #abb2bf;
+}
+
+.svelte-flow {
+  --xy-background-pattern-dot-color-default: #d19a66;
+}
