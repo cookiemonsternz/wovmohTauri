@@ -21,7 +21,7 @@ impl ConstantVectorNode {
         };
 
         // Main Field - Color
-        node.add_input_field(0, data_type::DataValue(vector));
+        node.add_input_field(0, data_type::DataValue::Vector3(vector));
         // Main Output Pin
         node.add_output_pin(0);
     }

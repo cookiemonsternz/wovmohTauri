@@ -12,7 +12,7 @@ pub struct ConstantNumberNode {
 }
 
 impl ConstantNumberNode {
-    pub fn new(id: i32, number: i32) {
+    pub fn new(id: i32, number: f64) {
         let node = ConstantNumberNode {
             properties: node::NodeProperties { id },
             input_fields: Vec::new(),
@@ -20,7 +20,7 @@ impl ConstantNumberNode {
         };
 
         // Main Field - Color
-        node.add_input_field(0, data_type::DataValue(number));
+        node.add_input_field(0, data_type::DataValue::Number(number));
         // Main Output Pin
         node.add_output_pin(0);
     }
