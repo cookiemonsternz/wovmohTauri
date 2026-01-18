@@ -2,16 +2,24 @@ use crate::{core::node::Node, types::data_type::DataValue};
 
 pub struct PinProperties {
     pub id: i32,
-    pub parent: &Node,
+    pub parent_id: i32,
 }
 
 pub struct InputField {
-    properties: PinProperties,
-    value: DataValue,
-    connected_output: Option<&OutputPin>,
+    pub properties: PinProperties,
+    pub value: DataValue,
+    connected_output: Option<&OutputPin> = None
 }
 
 impl InputField {
+    pub fn new(id: i32, parent_id: i32, value: DataValue) -> InputField {
+        Self {
+            properties: PinProperties { id, parent_id },
+            value,
+            connected_output: None,
+        }
+    }
+
     pub fn id(&self) -> i32 {
         self.properties.id
     }
@@ -72,6 +80,14 @@ pub struct OutputPin {
 }
 
 impl OutputPin {
+    pub fn new(id: i32, parent_id: i32) -> OutputPin {
+        Self {
+            properties: PinProperties { id, parent_id },
+            value: DataValue,
+            connected_fields: Vec::new(),
+        }
+    }
+
     pub fn id(&self) -> i32 {
         self.properties.id
     }

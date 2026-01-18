@@ -1,0 +1,48 @@
+use crate::core;
+use crate::types;
+
+use core::node;
+use core::pin;
+use types::color;
+use types::data_type;
+
+pub struct ConstantColorNode {
+    properties: node::NodeProperties,
+    input_fields: Vec<pin::InputField>,
+    output_pins: Vec<pin::OutputPin>,
+}
+
+impl ConstantColorNode {
+    pub fn new(id: i32, color: color::Color) {
+        let node = ConstantColorNode {
+            properties: node::NodeProperties { id },
+            input_fields: Vec::new(),
+            output_pins: Vec::new(),
+        };
+
+        // Main Field - Color
+        node.add_input_field(0, data_type::DataValue(Color));
+        // Main Output Pin
+        node.add_output_pin(0);
+    }
+}
+
+impl node::Node for ConstantColorNode {
+    fn properties(&self) -> &node::NodeProperties {
+        &self.properties
+    }
+
+    fn input_fields(&self) -> &Vec<pin::InputField> {
+        &self.input_fields
+    }
+
+    fn output_pins(&self) -> &Vec<pin::OutputPin> {
+        &self.output_pins
+    }
+
+    // Output value = input value;
+    fn process(&self) {
+        self.get_output_pin(0)
+            .set_value(self.get_input_field(0).value);
+    }
+}

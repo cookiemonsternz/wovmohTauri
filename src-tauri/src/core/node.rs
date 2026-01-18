@@ -24,6 +24,18 @@ pub trait Node {
             .unwrap()
     }
 
+    pub fn add_input_field(&self, id: i32, value: DataValue) {
+        let input_field = InputField::new(id, self.properties().id, value);
+
+        self.input_fields().push(input_field);
+    }
+
+    pub fn add_output_pin(&self, id: i32) {
+        let output_pin = OutputPin::new(id, self.properties().id);
+
+        self.output_pins().push(output_pin);
+    }
+
     pub fn get_in_degree(&self) -> Option<int> {
         let mut in_degree = 0;
 
