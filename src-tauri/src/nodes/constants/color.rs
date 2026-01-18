@@ -21,7 +21,7 @@ impl ConstantColorNode {
         };
 
         // Main Field - Color
-        node.add_input_field(0, data_type::DataValue(Color));
+        node.add_input_field(0, data_type::DataValue(color));
         // Main Output Pin
         node.add_output_pin(0);
     }
