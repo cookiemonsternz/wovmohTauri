@@ -46,7 +46,7 @@ impl Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Vec3 {
-        Vec3::new(-self.x(), -self.y(), -self.z())    
+        Vec3::new(-self.x(), -self.y(), -self.z())
     }
 }
 
@@ -108,6 +108,22 @@ impl Mul<f64> for Vec3 {
     }
 }
 
+impl Div for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: Vec3) -> Vec3 {
+        Vec3::new(self.x() / rhs.x(), self.y() / rhs.y(), self.z() / rhs.z())
+    }
+}
+
+impl Div<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn div(self, rhs: Vec3) -> Vec3 {
+        Vec3::new(self / rhs.x(), self / rhs.y(), self / rhs.z())
+    }
+}
+
 impl Div<f64> for Vec3 {
     type Output = Vec3;
 
@@ -120,7 +136,7 @@ pub fn dot(u: Vec3, v: Vec3) -> f64 {
     u.e[0] * v.e[0] + u.e[1] * v.e[1] + u.e[2] * v.e[2]
 }
 
-pub fn cross(u: Vec3, v:Vec3) -> Vec3 {
+pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
     Vec3::new(
         u.e[1] * v.e[2] - u.e[2] * v.e[1],
         u.e[2] * v.e[0] - u.e[0] * v.e[2],

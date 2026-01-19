@@ -192,6 +192,34 @@ impl Mul<f64> for Color {
     }
 }
 
+impl Div for Color {
+    type Output = Color;
+
+    fn div(self, rhs: Color) -> Color {
+        Color::new(ColorValue::RGBA(
+            self.r() / rhs.r(),
+            self.g() / rhs.g(),
+            self.b() / rhs.b(),
+            self.a() / rhs.a(),
+        ))
+        .clamp()
+    }
+}
+
+impl Div<Color> for f64 {
+    type Output = Color;
+
+    fn div(self, rhs: Color) -> Color {
+        Color::new(ColorValue::RGBA(
+            self / rhs.r(),
+            self / rhs.g(),
+            self / rhs.b(),
+            self / rhs.a(),
+        ))
+        .clamp()
+    }
+}
+
 impl Div<f64> for Color {
     type Output = Color;
 

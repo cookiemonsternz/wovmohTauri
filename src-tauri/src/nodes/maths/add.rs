@@ -1,20 +1,19 @@
 use crate::core;
-use crate::core::node::Node;
 use crate::types;
 
 use core::node;
 use core::pin;
 use types::data_type;
 
-pub struct ConstantNumberNode {
+pub struct AddNumberNode {
     properties: node::NodeProperties,
     input_fields: Vec<pin::InputField>,
     output_pins: Vec<pin::OutputPin>,
 }
 
-impl ConstantNumberNode {
+impl AddNumberNode {
     pub fn new(id: i32, num_a: f64, num_b: f64) {
-        let node = ConstantNumberNode {
+        let node = AddNumberNode {
             properties: node::NodeProperties { id },
             input_fields: Vec::new(),
             output_pins: Vec::new(),
@@ -28,7 +27,7 @@ impl ConstantNumberNode {
     }
 }
 
-impl node::Node for ConstantNumberNode {
+impl node::Node for AddNumberNode {
     fn properties(&self) -> &node::NodeProperties {
         &self.properties
     }
