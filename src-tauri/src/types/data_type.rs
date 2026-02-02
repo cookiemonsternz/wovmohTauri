@@ -1,6 +1,7 @@
 use super::*;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+#[derive(Copy, Clone)]
 pub enum DataValue {
     Number(f64),
     Boolean(bool),

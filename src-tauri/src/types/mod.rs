@@ -1,8 +1,8 @@
-pub mod data_type;
 pub mod color;
+pub mod data_type;
 pub mod vector;
 
-use data_type::PinValue;
+use data_type::DataValue;
 
 // Tests
 #[cfg(test)]
@@ -13,9 +13,9 @@ pub mod tests {
     fn create_color() {
         let rgb_val = ColorValue::RGB(0.5, 0.25, 0.0);
         let rgba_val = ColorValue::RGBA(0.5, 0.25, 0.0, 0.75);
-        let hex_chars: [char; 6]= ['1','9','3','2','9','6'];
+        let hex_chars: [char; 6] = ['1', '9', '3', '2', '9', '6'];
         let hex_val = ColorValue::HEX(hex_chars);
-        let hexa_chars: [char; 8]= ['1','9','3','2','9','6', 'C', '8'];
+        let hexa_chars: [char; 8] = ['1', '9', '3', '2', '9', '6', 'C', '8'];
         let hexa_val = ColorValue::HEXA(hexa_chars);
 
         let rgb_col = Color::new(rgb_val);

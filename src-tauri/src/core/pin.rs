@@ -1,41 +1,44 @@
-use crate::{core::node::Node, types::data_type::DataValue};
+use crate::{
+    core::{graph::Graph, node::Node},
+    types::data_type::DataValue,
+};
 
 pub struct PinProperties {
-    pub id: i32,
-    pub parent_id: i32,
+    pub id: usize,
+    pub parent_id: usize,
 }
 
 pub struct InputField {
     pub properties: PinProperties,
     pub value: DataValue,
-    connected_output: Option<&OutputPin> = None
+    connected_output_id: Option<usize>,
 }
 
 impl InputField {
-    pub fn new(id: i32, parent_id: i32, value: DataValue) -> InputField {
+    pub fn new(id: usize, parent_id: usize, value: DataValue) -> InputField {
         Self {
             properties: PinProperties { id, parent_id },
             value,
-            connected_output: None,
+            connected_output_id: None,
         }
     }
 
-    pub fn id(&self) -> i32 {
+    pub fn id(&self) -> usize {
         self.properties.id
     }
 
-    pub fn get_parent(&self) -> &Node {
-        self.properties.parent
+    pub fn get_parent_id(&self) -> usize {
+        self.properties.parent_id
     }
 
-    pub fn value(&self) -> &DataValue {
-        match self.connected_output {
+    pub fn value(&self, graph: &Graph) -> &DataValue {
+        match self.connected_output_id {
             Some(pin) => pin.value(),
             None => &self.value,
         }
     }
 
-    pub fn set_value(&self, value: DataValue) {
+    pub fn set_value(&mut self, value: DataValue) {
         // Only if disconnected
         self.value = value
     }
@@ -48,7 +51,7 @@ impl InputField {
         }
     }
 
-    pub fn get_connected_output(&self) -> Option<i32> {
+    pub fn get_connected_output(&self) -> Option<usize> {
         match self.connected_output {
             Some(pin) => Some(pin.properties.id),
             None => None,
@@ -59,7 +62,7 @@ impl InputField {
         self.connected_output = Some(pin)
     }
 
-    pub fn disconnect(&self) {
+    pub fn disconnect(&self, graph: &Graph) {
         match self.connected_output {
             Some(output_pin) => {
                 output_pin.disconnect(self);
@@ -76,36 +79,36 @@ impl InputField {
 pub struct OutputPin {
     properties: PinProperties,
     value: DataValue,
-    connected_fields: Vec<&InputField>,
+    connected_fields: Vec<usize>,
 }
 
 impl OutputPin {
-    pub fn new(id: i32, parent_id: i32) -> OutputPin {
+    pub fn new(id: usize, parent_id: usize) -> OutputPin {
         Self {
             properties: PinProperties { id, parent_id },
-            value: DataValue,
+            value: DataValue::Number(0.0),
             connected_fields: Vec::new(),
         }
     }
 
-    pub fn id(&self) -> i32 {
+    pub fn id(&self) -> usize {
         self.properties.id
     }
 
-    pub fn get_parent(&self) -> &Node {
-        self.properties.parent
+    pub fn get_parent_id(&self) -> usize {
+        self.properties.parent_id
     }
 
     pub fn value(&self) -> &DataValue {
         &self.value
     }
 
-    pub fn set_value(&self, value: DataValue) {
+    pub fn set_value(&mut self, value: DataValue) {
         self.value = value
     }
 
     pub fn is_connected(&self) -> bool {
-        if (connected_fields.len() > 0) {
+        if self.connected_fields.len() > 0 {
             true
         } else {
             false
@@ -137,7 +140,7 @@ impl OutputPin {
     }
 
     pub fn disconnect_all(&self) {
-        for input_field in self.connected_fields {
+        for input_field in self.get_connected_inputs() {
             input_field.disconnect();
         }
         // Should be unnecessary as input_field.disconnect() calls disconnect() on the output pin already
