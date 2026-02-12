@@ -1,6 +1,15 @@
 use super::*;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+#[derive(Clone)]
+pub enum DataType {
+    Number,
+    Boolean,
+    Color,
+    Vector3,
+    Point3,
+}
+
 #[derive(Copy, Clone)]
 pub enum DataValue {
     Number(f64),
@@ -19,6 +28,16 @@ impl DataValue {
             DataValue::Color(_) => "Color",
             DataValue::Vector3(_) => "Vector3",
             DataValue::Point3(_) => "Point3",
+        }
+    }
+
+    pub const fn default(data_type: DataType) -> DataValue {
+        match data_type {
+            DataType::Number => DataValue::Number(0.0),
+            DataType::Boolean => DataValue::Boolean(false),
+            DataType::Color => DataValue::Color(color::Color::default()),
+            DataType::Vector3 => DataValue::Vector3(vector::Vec3::default()),
+            DataType::Point3 => DataValue::Point3(vector::Point3::default()),
         }
     }
 }
@@ -66,10 +85,10 @@ impl Add for DataValue {
     }
 }
 
-impl Neg for DataValue {
+impl Sub for DataValue {
     type Output = Result<DataValue, EvalError>;
 
-    fn neg(self, rhs: DataValue) -> Self::Output {
+    fn sub(self, rhs: DataValue) -> Self::Output {
         use DataValue::*;
 
         match (self, rhs) {
@@ -81,13 +100,13 @@ impl Neg for DataValue {
             (Point3(a), Point3(b)) => Ok(Point3(a - b)),
 
             (Boolean(_), _) | (_, Boolean(_)) => Err(EvalError::TypeError {
-                op: "+",
+                op: "-",
                 lhs: self.type_name(),
                 rhs: rhs.type_name(),
             }),
 
             _ => Err(EvalError::UnsupportedOp {
-                op: "+",
+                op: "-",
                 lhs: self.type_name(),
                 rhs: rhs.type_name(),
             }),

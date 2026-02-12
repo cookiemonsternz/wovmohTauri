@@ -1,48 +1,29 @@
-use crate::core;
-use crate::types;
+use crate::core::node::*;
+use crate::types::color::{Color, ColorValue};
+use crate::types::data_type::*;
+use std::sync::LazyLock;
 
-use core::node;
-use core::pin;
-use types::color;
-use types::data_type;
+fn constant_color_process(inputs: Vec<DataValue>, outputs: &mut Vec<&mut DataValue>) {
+    let input_color = match inputs[0] {
+        DataValue::Color(color) => color,
+        _ => panic!("Expected Color"),
+    };
 
-pub struct ConstantColorNode {
-    properties: node::NodeProperties,
-    input_fields: Vec<pin::InputField>,
-    output_pins: Vec<pin::OutputPin>,
+    if let DataValue::Color(ref mut n) = outputs[0] {
+        *n = input_color;
+    };
 }
 
-impl ConstantColorNode {
-    pub fn new(id: i32, color: color::Color) {
-        let node = ConstantColorNode {
-            properties: node::NodeProperties { id },
-            input_fields: Vec::new(),
-            output_pins: Vec::new(),
-        };
-
-        // Main Field - Color
-        node.add_input_field(0, data_type::DataValue::Color(color));
-        // Main Output Pin
-        node.add_output_pin(0);
-    }
-}
-
-impl node::Node for ConstantColorNode {
-    fn properties(&self) -> &node::NodeProperties {
-        &self.properties
-    }
-
-    fn input_fields(&self) -> &Vec<pin::InputField> {
-        &self.input_fields
-    }
-
-    fn output_pins(&self) -> &Vec<pin::OutputPin> {
-        &self.output_pins
-    }
-
-    // Output value = input value;
-    fn process(&self) {
-        self.get_output_pin(0)
-            .set_value(self.get_input_field(0).value);
-    }
-}
+pub static CONSTANT_COLOR_DESCRIPTOR: NodeDescriptor = NodeDescriptor {
+    name: "Constant Color",
+    inputs: &[InputDesc {
+        name: "Color",
+        data_type: DataType::Color,
+        default: DataValue::Color(Color::default()),
+    }],
+    outputs: &[OutputDesc {
+        name: "Color",
+        data_type: DataType::Color,
+    }],
+    process: constant_color_process,
+};

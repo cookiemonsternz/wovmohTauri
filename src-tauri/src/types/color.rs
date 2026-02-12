@@ -29,6 +29,12 @@ impl Color {
         }
     }
 
+    pub const fn default() -> Color {
+        Color {
+            e: [0.0, 0.0, 0.0, 1.0],
+        }
+    }
+
     pub fn r(&self) -> f64 {
         self.e[0]
     }

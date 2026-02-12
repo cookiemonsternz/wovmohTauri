@@ -1,47 +1,75 @@
-use crate::core;
-use crate::types;
+use crate::core::node::*;
+use crate::types::data_type::*;
 
-use core::node;
-use core::pin;
-use types::data_type;
+fn constant_number_process(inputs: Vec<DataValue>, outputs: &mut Vec<&mut DataValue>) {
+    let input_number = match inputs[0] {
+        DataValue::Number(number) => number,
+        _ => panic!("Expected Number"),
+    };
 
-pub struct ConstantNumberNode {
-    properties: node::NodeProperties,
-    input_fields: Vec<pin::InputField>,
-    output_pins: Vec<pin::OutputPin>,
+    if let DataValue::Number(ref mut n) = outputs[0] {
+        *n = input_number;
+    };
 }
 
-impl ConstantNumberNode {
-    pub fn new(id: i32, number: f64) {
-        let node = ConstantNumberNode {
-            properties: node::NodeProperties { id },
-            input_fields: Vec::new(),
-            output_pins: Vec::new(),
-        };
+pub static CONSTANT_NUMBER_DESCRIPTOR: NodeDescriptor = NodeDescriptor {
+    name: "Constant Number",
+    inputs: &[InputDesc {
+        name: "Number",
+        data_type: DataType::Number,
+        default: DataValue::default(DataType::Number),
+    }],
+    outputs: &[OutputDesc {
+        name: "Number",
+        data_type: DataType::Color,
+    }],
+    process: constant_number_process,
+};
 
-        // Main Field - Color
-        node.add_input_field(0, data_type::DataValue::Number(number));
-        // Main Output Pin
-        node.add_output_pin(0);
-    }
-}
+// use crate::core;
+// use crate::types;
 
-impl node::Node for ConstantNumberNode {
-    fn properties(&self) -> &node::NodeProperties {
-        &self.properties
-    }
+// use core::node;
+// use core::pin;
+// use types::data_type;
 
-    fn input_fields(&self) -> &Vec<pin::InputField> {
-        &self.input_fields
-    }
+// pub struct ConstantNumberNode {
+//     properties: node::NodeProperties,
+//     input_fields: Vec<pin::InputField>,
+//     output_pins: Vec<pin::OutputPin>,
+// }
 
-    fn output_pins(&self) -> &Vec<pin::OutputPin> {
-        &self.output_pins
-    }
+// impl ConstantNumberNode {
+//     pub fn new(id: i32, number: f64) {
+//         let node = ConstantNumberNode {
+//             properties: node::NodeProperties { id },
+//             input_fields: Vec::new(),
+//             output_pins: Vec::new(),
+//         };
 
-    // Output value = input value;
-    fn process(&self) {
-        self.get_output_pin(0)
-            .set_value(self.get_input_field(0).value);
-    }
-}
+//         // Main Field - Color
+//         node.add_input_field(0, data_type::DataValue::Number(number));
+//         // Main Output Pin
+//         node.add_output_pin(0);
+//     }
+// }
+
+// impl node::Node for ConstantNumberNode {
+//     fn properties(&self) -> &node::NodeProperties {
+//         &self.properties
+//     }
+
+//     fn input_fields(&self) -> &Vec<pin::InputField> {
+//         &self.input_fields
+//     }
+
+//     fn output_pins(&self) -> &Vec<pin::OutputPin> {
+//         &self.output_pins
+//     }
+
+//     // Output value = input value;
+//     fn process(&self) {
+//         self.get_output_pin(0)
+//             .set_value(self.get_input_field(0).value);
+//     }
+// }

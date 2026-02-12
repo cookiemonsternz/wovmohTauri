@@ -1,11 +1,17 @@
 <script lang="ts">
     import { invoke } from "@tauri-apps/api/core";
-    import { SvelteFlow, Background, Controls, Position, type EdgeTypes } from "@xyflow/svelte";
+    import {
+        SvelteFlow,
+        Background,
+        Controls,
+        Position,
+        type EdgeTypes,
+    } from "@xyflow/svelte";
     import CustomEdge from "./SvelteFlow/CustomEdge.svelte";
     import "@xyflow/svelte/dist/style.css";
 
     const edgeTypes: EdgeTypes = {
-        'custom-edge': CustomEdge
+        "custom-edge": CustomEdge,
     };
 
     let name = $state("");
@@ -22,15 +28,38 @@
         { id: "2", position: { x: 0, y: 100 }, data: { label: "2" } },
     ]);
 
-    let edges = $state.raw([{ id: "e1-2", source: "1", target: "2", type: "custom-edge", animated: true }]);
+    let edges = $state.raw([
+        {
+            id: "e1-2",
+            source: "1",
+            target: "2",
+            type: "custom-edge",
+            animated: true,
+        },
+    ]);
+
+    let x = document.getElementById("butttooon");
+    x?.addEventListener("click", () => {
+        invoke("add_graph").then(() => {
+            console.log("Success");
+        });
+    });
+
+    console.log(x);
 </script>
 
 <svelte:head>
-	<link rel="stylesheet" href="/style/svelte-flow.css" />
+    <link rel="stylesheet" href="/style/svelte-flow.css" />
 </svelte:head>
 
 <main class="container" style="width: 100vw; height: 100vh">
-    <SvelteFlow {edgeTypes} defaultEdgeOptions={{type: "custom-edge"}} bind:nodes bind:edges>
+    <button id="butttooon">HI</button>
+    <SvelteFlow
+        {edgeTypes}
+        defaultEdgeOptions={{ type: "custom-edge" }}
+        bind:nodes
+        bind:edges
+    >
         <Background />
         <Controls />
     </SvelteFlow>

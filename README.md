@@ -28,5 +28,4 @@ Graph:
             dataType: enum (Data type)
 
 ## TODO:
-- Finish implementing graph functions (src-tauri/src/core/graph.rs)
-- Maybe rework pins to use hashmap for connected pins
+Work on implementing connection between frontend and backend
