@@ -38,14 +38,12 @@
         },
     ]);
 
-    let x = document.getElementById("butttooon");
-    x?.addEventListener("click", () => {
+    function addGraph() {
+        console.log("Clicked")
         invoke("add_graph").then(() => {
             console.log("Success");
         });
-    });
-
-    console.log(x);
+    }
 </script>
 
 <svelte:head>
@@ -53,7 +51,7 @@
 </svelte:head>
 
 <main class="container" style="width: 100vw; height: 100vh">
-    <button id="butttooon">HI</button>
+    <button onclick={addGraph}>HI</button>
     <SvelteFlow
         {edgeTypes}
         defaultEdgeOptions={{ type: "custom-edge" }}
