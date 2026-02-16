@@ -1,7 +1,7 @@
 use std::collections::{HashMap, VecDeque};
 
 use crate::{
-    core::{input_field::*, node::*, output_pin::*},
+    core::{input_field::*, node::{self, *}, output_pin::*},
     types::data_type::DataValue,
 };
 
@@ -28,6 +28,10 @@ impl Graph {
             execution_order: Vec::new(),
             order_dirty: false,
         }
+    }
+
+    pub fn get_node(&self, node_id: NodeId) -> &Node {
+        &self.nodes[node_id]
     }
 
     pub fn add_node(&mut self, kind: NodeKind) {

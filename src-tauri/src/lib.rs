@@ -1,6 +1,6 @@
 // Tauri Imports
 use tauri::async_runtime::Mutex;
-use tauri::{Manager, State};
+use tauri::{ Manager, State };
 
 use crate::managers::graph_manager::GraphManager;
 
