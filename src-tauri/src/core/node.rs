@@ -1,5 +1,9 @@
 use serde::Deserialize;
 
+use crate::core::graph::Graph;
+use crate::dto::input_field_dto::InputFieldDto;
+use crate::dto::node_dto::NodeDto;
+use crate::dto::output_pin_dto::OutputPinDto;
 use crate::nodes;
 use crate::types::data_type::{DataType, DataValue};
 
@@ -9,11 +13,44 @@ pub type NodeId = usize;
 pub struct Node {
     pub id: NodeId,
     pub kind: NodeKind,
+    pub ui_state: NodeUIState,
     pub inputs: Vec<usize>,
     pub outputs: Vec<usize>,
 }
 
-#[derive(Clone, Deserialize)]
+impl Node {
+    pub fn to_dto(&self) -> NodeDto {
+        NodeDto {
+            id: self.id,
+            kind: self.kind.into(),
+            position: self.ui_state.position,
+            inputs: self
+                .kind
+                .descriptor()
+                .inputs
+                .iter()
+                .map(|x| InputFieldDto {
+                    name: x.name,
+                    data_type: x.data_type,
+                    value: DataValue::default(x.data_type),
+                })
+                .collect(),
+            outputs: self
+                .kind
+                .descriptor()
+                .outputs
+                .iter()
+                .map(|x| OutputPinDto {
+                    name: x.name,
+                    data_type: x.data_type,
+                    value: DataValue::default(x.data_type),
+                })
+                .collect(),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Deserialize, strum_macros::IntoStaticStr)]
 pub enum NodeKind {
     ConstantColor,
     ConstantNumber,
@@ -36,6 +73,7 @@ pub struct NodeDescriptor {
 }
 
 pub struct InputDesc {
+    pub id: usize,
     pub name: &'static str,
     pub data_type: DataType,
     pub default: DataValue,
@@ -43,8 +81,14 @@ pub struct InputDesc {
 
 #[derive(Clone)]
 pub struct OutputDesc {
+    pub id: usize,
     pub name: &'static str,
     pub data_type: DataType,
+}
+
+#[derive(Clone)]
+pub struct NodeUIState {
+    pub position: (f64, f64),
 }
 
 // use crate::core::graph::Graph;

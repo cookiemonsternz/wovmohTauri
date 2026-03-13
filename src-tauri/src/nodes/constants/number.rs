@@ -15,13 +15,15 @@ fn constant_number_process(inputs: Vec<DataValue>, outputs: &mut Vec<&mut DataVa
 pub static CONSTANT_NUMBER_DESCRIPTOR: NodeDescriptor = NodeDescriptor {
     name: "Constant Number",
     inputs: &[InputDesc {
+        id: 0,
         name: "Number",
         data_type: DataType::Number,
         default: DataValue::default(DataType::Number),
     }],
     outputs: &[OutputDesc {
+        id: 0,
         name: "Number",
-        data_type: DataType::Color,
+        data_type: DataType::Number,
     }],
     process: constant_number_process,
 };

@@ -1,7 +1,10 @@
+use std::cmp::PartialEq;
 use std::fmt::{Display, Formatter, Result};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-#[derive(Copy, Clone, Default)]
+use serde::Serialize;
+
+#[derive(Copy, Clone, Default, Serialize, Debug)]
 pub struct Vec3 {
     e: [f64; 3],
 }
@@ -88,6 +91,12 @@ impl Sub for Vec3 {
     }
 }
 
+impl SubAssign for Vec3 {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs
+    }
+}
+
 impl Mul for Vec3 {
     type Output = Vec3;
 
@@ -133,6 +142,18 @@ impl Div<f64> for Vec3 {
 
     fn div(self, rhs: f64) -> Vec3 {
         Vec3::new(self.x() / rhs, self.y() / rhs, self.z() / rhs)
+    }
+}
+
+fn approx_eq(lhs: f64, rhs: f64) -> bool {
+    return (lhs - rhs).abs() < 0.00001;
+}
+
+impl PartialEq for Vec3 {
+    fn eq(&self, other: &Self) -> bool {
+        approx_eq(self.e[0], other.e[0])
+            && approx_eq(self.e[1], other.e[1])
+            && approx_eq(self.e[2], other.e[2])
     }
 }
 

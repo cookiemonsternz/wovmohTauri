@@ -1,4 +1,7 @@
+use std::cmp::PartialEq;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
+
+use serde::Serialize;
 
 pub enum ColorValue {
     RGB(f64, f64, f64),
@@ -7,7 +10,7 @@ pub enum ColorValue {
     HEXA([char; 8]),
 }
 
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, Serialize, Debug)]
 pub struct Color {
     e: [f64; 4],
 }
@@ -237,6 +240,12 @@ impl Div<f64> for Color {
             self.a() / rhs,
         ))
         .clamp()
+    }
+}
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Self) -> bool {
+        self.e == other.e
     }
 }
 

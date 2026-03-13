@@ -1,13 +1,23 @@
 use std::collections::{HashMap, VecDeque};
 
 use crate::{
-    core::{input_field::*, node::{self, *}, output_pin::*},
+    core::{
+        input_field::*,
+        node::{self, *},
+        output_pin::*,
+    },
+    dto::{
+        connection_dto::ConnectionDto, graph_dto::GraphDto, input_field_dto::InputFieldDto,
+        node_dto::NodeDto, output_pin_dto::OutputPinDto,
+    },
     types::data_type::DataValue,
 };
 
 pub type GraphId = usize;
 
 pub struct Graph {
+    id: GraphId,
+
     nodes: Vec<Node>,
     inputs: Vec<InputField>,
     outputs: Vec<OutputPin>,
@@ -19,8 +29,9 @@ pub struct Graph {
 }
 
 impl Graph {
-    pub fn new() -> Graph {
+    pub fn new(id: GraphId) -> Graph {
         Graph {
+            id: id,
             nodes: Vec::new(),
             inputs: Vec::new(),
             outputs: Vec::new(),
@@ -34,7 +45,11 @@ impl Graph {
         &self.nodes[node_id]
     }
 
-    pub fn add_node(&mut self, kind: NodeKind) {
+    pub fn has_node(&self, node_id: NodeId) -> bool {
+        return self.nodes.len() < node_id;
+    }
+
+    pub fn add_node(&mut self, kind: NodeKind, ui_state: NodeUIState) {
         let desc = kind.descriptor();
 
         let mut inputs = Vec::new();
@@ -65,6 +80,7 @@ impl Graph {
         let node = Node {
             id: self.nodes.len(),
             kind,
+            ui_state,
             inputs,
             outputs,
         };
@@ -118,6 +134,11 @@ impl Graph {
 
         // Swap and remove node
         self.nodes.swap_remove(node_id);
+
+        if self.nodes.len() == 0 {
+            self.order_dirty = true;
+            return;
+        }
 
         // Update node at node_id
         let node = &mut self.nodes[node_id];
@@ -221,11 +242,14 @@ impl Graph {
 
     fn calculate_indegrees(&self) -> HashMap<NodeId, u32> {
         let mut indegrees = HashMap::with_capacity(self.nodes.len());
+        for input in &self.inputs {
+            indegrees.insert(input.parent, 0);
+        }
 
         for input in &self.inputs {
             if input.connected_output.is_some() {
                 let indegrees_val = indegrees.get_mut(&input.parent).unwrap();
-                *indegrees_val -= 1;
+                *indegrees_val += 1;
             }
         }
 
@@ -243,7 +267,6 @@ impl Graph {
         }
 
         self.execution_order.clear();
-        self.execution_order.resize(self.nodes.len(), 0);
 
         while !queue.is_empty() {
             let node_id = queue.pop_front().unwrap();
@@ -287,254 +310,110 @@ impl Graph {
             (node.kind.descriptor().process)(inputs, outputs.as_mut());
         }
     }
+
+    pub fn to_dto(&self) -> GraphDto {
+        let mut connections: Vec<ConnectionDto> = Vec::new();
+
+        for node in &self.nodes {
+            for input_index in &node.inputs {
+                match self.inputs[*input_index].connected_output {
+                    Some(output_pin_id) => connections.push(ConnectionDto {
+                        from: output_pin_id,
+                        to: *input_index,
+                    }),
+                    None => continue,
+                };
+            }
+        }
+
+        GraphDto {
+            id: self.id,
+            nodes: self.nodes.iter().map(|x| x.to_dto()).collect(),
+            connections: connections,
+        }
+    }
 }
 
-// use std::collections::HashMap;
-// use std::collections::VecDeque;
-// use std::hash::Hash;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-// use super::node::*;
-// use super::pin::*;
-// use crate::core::node;
-// use crate::types::data_type::DataValue;
+    #[test]
+    fn test_graph_add_node() {
+        let mut graph = Graph::new(0);
 
-// pub struct Graph {
-//     // field id : InputField
-//     input_fields: HashMap<usize, InputField>,
-//     // pin id : OutputPin
-//     output_pins: HashMap<usize, OutputPin>,
+        let node_kind = node::NodeKind::ConstantNumber;
+        let ui_state = node::NodeUIState {
+            position: (0.0, 0.0),
+        };
 
-//     nodes: Vec<Box<dyn Node>>,
-//     // node id : Vec Index
-//     nodes_map: HashMap<usize, usize>,
-//     // Whether nodes need resorting before evaluation
-//     dirty: bool,
-// }
+        graph.add_node(node_kind, ui_state);
 
-// impl Graph {
-//     // Pins
-//     pub fn input_fields(&self) -> &HashMap<usize, InputField> {
-//         &self.input_fields
-//     }
+        let node = graph.get_node(0);
 
-//     pub fn input_fields_mut(&mut self) -> &mut HashMap<usize, InputField> {
-//         &mut self.input_fields
-//     }
+        // assert!(node.kind. == node_kind);
+        // assert!(node.ui_state == ui_state);
+        assert!(node.id == 0);
+    }
 
-//     pub fn output_pins(&self) -> &HashMap<usize, OutputPin> {
-//         &self.output_pins
-//     }
+    #[test]
+    fn test_graph_remove_node() {
+        let mut graph = Graph::new(0);
 
-//     pub fn output_pins_mut(&mut self) -> &mut HashMap<usize, OutputPin> {
-//         &mut self.output_pins
-//     }
+        let node_kind = node::NodeKind::ConstantNumber;
+        let ui_state = node::NodeUIState {
+            position: (0.0, 0.0),
+        };
 
-//     pub fn get_input_field(&self, id: &usize) -> &InputField {
-//         self.input_fields().get(id).unwrap()
-//     }
+        graph.add_node(node_kind, ui_state);
 
-//     pub fn get_input_field_mut(&mut self, id: &usize) -> &mut InputField {
-//         self.input_fields_mut().get_mut(id).unwrap()
-//     }
+        graph.remove_node(0);
 
-//     pub fn get_output_pin(&self, id: &usize) -> &OutputPin {
-//         self.output_pins().get(id).unwrap()
-//     }
+        assert!(graph.has_node(0) == false);
+    }
 
-//     pub fn get_output_pin_mut(&mut self, id: &usize) -> &mut OutputPin {
-//         self.output_pins_mut().get_mut(id).unwrap()
-//     }
+    #[test]
+    fn test_graph_connect_disconnect_node() {
+        let mut graph = Graph::new(0);
 
-//     pub fn add_input_field(&mut self, field: InputField) {
-//         self.input_fields_mut().insert(field.id(), field);
-//     }
+        let node_kind = node::NodeKind::ConstantNumber;
+        let ui_state = node::NodeUIState {
+            position: (0.0, 0.0),
+        };
 
-//     pub fn add_output_pin(&mut self, pin: OutputPin) {
-//         self.output_pins_mut().insert(pin.id(), pin);
-//     }
+        graph.add_node(node_kind, ui_state.clone());
 
-//     pub fn set_input_field_value(&mut self, id: &usize, value: DataValue) {
-//         let input_field = self.get_input_field_mut(id);
-//         input_field.value = value;
-//     }
+        graph.add_node(node_kind, ui_state.clone());
 
-//     pub fn get_input_field_value(&self, id: &usize) -> &DataValue {
-//         let input_field = self.get_input_field(id);
+        graph.connect(0, 1);
 
-//         match input_field.get_connected_output() {
-//             Some(output_pin_id) => {
-//                 let output_pin = self.get_output_pin(&output_pin_id);
-//                 output_pin.value()
-//             }
-//             None => input_field.value(),
-//         }
-//     }
+        graph.disconnect(1);
+    }
 
-//     pub fn get_output_pin_value(&self, id: &usize) -> &DataValue {
-//         self.get_output_pin(id).value()
-//     }
+    #[test]
+    fn test_graph() {
+        let mut graph = Graph::new(0);
 
-//     fn disconnect_input_field(&mut self, input_field_id: &usize) {
-//         let input_field = self.get_input_field_mut(input_field_id);
-//         let connected_output_id = input_field.get_connected_output().unwrap();
-//         // Clear ref to pin from field
-//         input_field.clear_connected_output();
-//         // Drop so that we can do another mut borrow
-//         drop(input_field);
+        let node_kind = node::NodeKind::ConstantNumber;
+        let ui_state = node::NodeUIState {
+            position: (0.0, 0.0),
+        };
 
-//         // clear ref to field from pin
-//         let output_field = self.get_output_pin_mut(&connected_output_id);
-//         output_field.remove_connected_field(*input_field_id);
+        graph.add_node(node_kind, ui_state.clone());
+        graph.add_node(node_kind, ui_state.clone());
 
-//         self.dirty = true;
-//     }
+        graph.connect(0, 1);
 
-//     // pub fn disconnect_input_field(&mut self, input_field_id: &usize) {
-//     //     let input_field = self.get_input_field_mut(input_field_id);
+        // for mut output_value in graph.output_values_for(0) {
+        //     output_value = &mut DataValue::Number(5.0);
+        // }
 
-//     //     input_field.disconnect();
-//     // }
+        graph.inputs[0].value = DataValue::Number(5.0);
 
-//     // pub fn disconnect_output_pin(&mut self, output_pin_id: &usize, input_field_id: usize) {
-//     //     // Can just disconnect the input field, as only one output can be connected to an input
-//     //     self.disconnect_input_field(&input_field_id);
-//     // }
+        // graph.sort_nodes();
 
-//     pub fn disconnect_output_pin_all(&mut self, output_pin_id: &usize) {
-//         let output_pin = self.get_output_pin_mut(output_pin_id);
+        graph.process();
 
-//         let input_field_ids: Vec<_> = output_pin.get_connected_inputs().clone();
-
-//         for input_field_id in input_field_ids {
-//             self.disconnect_input_field(&input_field_id);
-//         }
-
-//         self.dirty = true;
-//     }
-
-//     // pub fn disconnect_pin_pair(&mut self, output_pin_id: &usize, input_field_id: &usize) {
-//     //     let output_pin = self.get_output_pin_mut(output_pin_id);
-//     //     output_pin.disconnect(*input_field_id);
-
-//     //     self.get_input_field_mut(input_field_id).disconnect();
-//     // }
-
-//     // Nodes
-//     pub fn nodes(&self) -> &Vec<Box<dyn Node>> {
-//         &self.nodes
-//     }
-
-//     pub fn nodes_map(&self) -> &HashMap<usize, usize> {
-//         &self.nodes_map
-//     }
-
-//     pub fn get_node_id(&self, node: &Box<dyn Node>) -> usize {
-//         self.nodes().iter().position(|x| x.eq(node)).unwrap()
-//     }
-
-//     pub fn add_node(&mut self, node: Box<dyn Node>) {
-//         self.nodes_map
-//             .insert(node.properties().id, self.get_node_id(&node));
-//         self.nodes.push(node);
-//     }
-
-//     pub fn remove_node(&mut self, id: &usize) {
-//         // Disconnect nodes connections before removal
-//         let node = &self.nodes[*self.nodes_map.get(id).unwrap()];
-//         let input_field_ids = node.input_fields();
-//         let output_pin_ids = node.output_pins();
-
-//         // Disconnect all inputs
-//         for input_field_id in input_field_ids {
-//             self.disconnect_input_field(&input_field_id);
-//         }
-
-//         // Disconnect all outputs
-//         for output_pin_id in output_pin_ids {
-//             self.disconnect_output_pin_all(&output_pin_id);
-//         }
-
-//         // Remove from map and vector
-//         let index = self.nodes_map.remove(id).unwrap();
-//         self.nodes.remove(index);
-
-//         self.dirty = true
-//     }
-
-//     pub fn connect(&mut self, src_pin_id: usize, dst_field_id: usize) {
-//         let output_pin = self.get_output_pin_mut(&src_pin_id);
-//         output_pin.add_connected_field(dst_field_id);
-
-//         let input_field = self.get_input_field_mut(&dst_field_id);
-//         input_field.set_connected_output(&src_pin_id);
-
-//         self.dirty = true
-//     }
-
-//     // pub fn disconnect(&mut self, dst_node_id: usize, dst_field_id: usize) {
-//     //     self.disconnect_input_field(&dst_field_id);
-
-//     //     self.dirty = true
-//     // }
-
-//     pub fn evaluate(&mut self) {
-//         if self.dirty {
-//             self.sort();
-//         }
-
-//         for node in self.nodes() {
-//             node.process()
-//         }
-//     }
-
-//     pub fn sort(&mut self) {
-//         let nodes = self.get_topologically_sorted_nodes();
-//     }
-
-//     fn get_topologically_sorted_nodes(&self) -> Vec<Box<dyn Node>> {
-//         let mut in_degrees: HashMap<usize, usize> = HashMap::new();
-//         let mut queue: VecDeque<Box<dyn Node>> = VecDeque::new();
-//         let mut sorted_result: Vec<Box<dyn Node>> = Vec::new();
-
-//         for node in self.nodes().clone() {
-//             let in_degree = node.get_in_degree(self);
-
-//             // in_degrees[&node.properties().id] = node.get_in_degree();
-//             in_degrees.insert(node.properties().id, node.get_in_degree(self));
-
-//             if in_degree == 0 {
-//                 queue.push_front(node);
-//             }
-//         }
-
-//         while !queue.is_empty() {
-//             let node = queue.pop_front().unwrap();
-
-//             sorted_result.push(node);
-
-//             // Add connections to queue
-//             for output_pin_id in node.output_pins() {
-//                 let output_pin = self.get_output_pin(&output_pin_id);
-//                 for input_field_id in output_pin.get_connected_inputs() {
-//                     let input_field = self.get_input_field(&input_field_id);
-//                     let node = &self.nodes[self.nodes_map[&input_field.get_parent_id()]];
-//                     // subtract 1 from in degreees
-//                     in_degrees
-//                         .entry(node.properties().id)
-//                         .and_modify(|x| *x -= 1);
-
-//                     if in_degrees[&node.properties().id] == 0 {
-//                         queue.push_back(node);
-//                     }
-//                 } // for field
-//             } // for pin
-//         } // while queue
-
-//         // Check for loops
-//         if sorted_result.len() != self.nodes().len() {
-//             panic!()
-//         }
-
-//         return sorted_result;
-//     }
-// }
+        assert!(graph.outputs[1].value == DataValue::Number(5.0))
+    }
+}

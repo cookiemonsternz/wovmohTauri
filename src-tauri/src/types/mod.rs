@@ -8,6 +8,7 @@ use data_type::DataValue;
 #[cfg(test)]
 pub mod tests {
     use super::color::*;
+    use super::vector::*;
 
     #[test]
     fn create_color() {
@@ -53,5 +54,24 @@ pub mod tests {
         let mut div_col = Color::new(ColorValue::RGBA(0.25, 0.0, 0.5, 1.0));
         div_col /= 2.0;
         assert_eq!((0.125, 0.0, 0.25, 0.5), div_col.rgba());
+    }
+
+    #[test]
+    fn vector_ops() {
+        let mut add_vec = Vec3::new(0.1, 0.25, 0.5);
+        add_vec += add_vec;
+        assert_eq!(Vec3::new(0.2, 0.5, 1.0), add_vec);
+
+        let mut sub_vec = Vec3::new(0.1, 0.25, 0.5);
+        sub_vec -= Vec3::new(0.05, 0.1, 0.25);
+        assert_eq!(Vec3::new(0.05, 0.15, 0.25), sub_vec);
+
+        let mut mul_vec = Vec3::new(0.1, 0.25, 0.5);
+        mul_vec *= Vec3::new(0.1, 0.1, 0.25);
+        assert_eq!(Vec3::new(0.01, 0.025, 0.125), mul_vec);
+
+        let mut div_vec = Vec3::new(0.1, 0.25, 0.5);
+        div_vec /= 2.0;
+        assert_eq!(Vec3::new(0.05, 0.125, 0.25), div_vec);
     }
 }

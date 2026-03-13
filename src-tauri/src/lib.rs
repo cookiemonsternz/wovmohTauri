@@ -1,14 +1,15 @@
 // Tauri Imports
 use tauri::async_runtime::Mutex;
-use tauri::{ Manager, State };
+use tauri::Manager;
 
 use crate::managers::graph_manager::GraphManager;
 
-mod api;
-mod core;
-mod managers;
-mod nodes;
-mod types;
+pub mod api;
+pub mod core;
+pub mod dto;
+pub mod managers;
+pub mod nodes;
+pub mod types;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -20,7 +21,11 @@ fn greet(name: &str) -> String {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, api::core::add_graph])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            api::core::add_graph,
+            api::core::get_graph_dto
+        ])
         .setup(|app| {
             app.manage(Mutex::new(GraphManager::new()));
             Ok(())

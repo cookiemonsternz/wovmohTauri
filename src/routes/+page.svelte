@@ -1,23 +1,8 @@
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
-
-    import {
-        SvelteFlow,
-        Background,
-        Controls,
-        Position,
-        type EdgeTypes,
-        type NodeTypes,
-    } from "@xyflow/svelte";
-
+    import {invoke} from "@tauri-apps/api/core";
+    import {Background, Controls, type EdgeTypes, SvelteFlow,} from "@xyflow/svelte";
     import CustomEdge from "./SvelteFlow/CustomEdge.svelte";
-    import Node from "$lib/core/node.svelte";
-
     import "@xyflow/svelte/dist/style.css";
-
-    const nodeTypes: NodeTypes = {
-        node: Node,
-    };
 
     const edgeTypes: EdgeTypes = {
         "custom-edge": CustomEdge,
@@ -29,22 +14,12 @@
     async function greet(event: Event) {
         event.preventDefault();
         // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-        greetMsg = await invoke("greet", { name });
+        greetMsg = await invoke("greet", {name});
     }
 
     let nodes = $state.raw([
-        {
-            id: "1",
-            position: { x: 0, y: 0 },
-            data: { label: "1" },
-            type: "node",
-        },
-        {
-            id: "2",
-            position: { x: 0, y: 100 },
-            data: { label: "2" },
-            type: "node",
-        },
+        {id: "1", position: {x: 0, y: 0}, data: {label: "1"}},
+        {id: "2", position: {x: 0, y: 100}, data: {label: "2"}},
     ]);
 
     let edges = $state.raw([
@@ -57,29 +32,37 @@
         },
     ]);
 
+
     function addGraph() {
-        console.log("Clicked");
+        console.log("Adding Grpah")
+
         invoke("add_graph").then(() => {
             console.log("Success");
         });
+
+        console.log("Getting graph")
+
+        invoke("get_graph_dto", {graphId: 0}).then((graphDto) => {
+            console.log(graphDto);
+        })
     }
 </script>
 
+`
 <svelte:head>
-    <link rel="stylesheet" href="/style/svelte-flow.css" />
+    <link rel="stylesheet" href="/style/svelte-flow.css"/>
 </svelte:head>
 
 <main class="container" style="width: 100vw; height: 100vh">
-    <button onclick={addGraph}>HI</button>
+    <button id="butttooon" onclick={addGraph}>HI</button>
     <SvelteFlow
-        {edgeTypes}
-        {nodeTypes}
-        defaultEdgeOptions={{ type: "custom-edge" }}
-        bind:nodes
-        bind:edges
+            {edgeTypes}
+            defaultEdgeOptions={{ type: "custom-edge" }}
+            bind:nodes
+            bind:edges
     >
-        <Background />
-        <Controls />
+        <Background/>
+        <Controls/>
     </SvelteFlow>
 </main>
 

@@ -7,8 +7,9 @@
 - **\<Node\>**:
   - **id**<sub>\<NodeId\></sub> *- Node Id*
   - **kind**<sub>\<NodeKind\></sub> *- Node Kind*
-  - **inputs_offset**<sub>\<usize\></sub> *- Index of the start of the nodes inputs in graph.inputs*
-  - **outputs_offset**<sub>\<usize\></sub> *- Index of the start of the nodes outputs in graph.inputs*
+  - **ui_state**<sub>\<NodeUIState\></sub> *- Node UI State*
+  - **inputs**<sub>Vec\<\<usize\>\></sub> *- Vec of node input ids in graph.inputs*
+  - **outputs_offset**<sub>Vec\<\<usize\>\></sub> *- Vec of node output ids in graph.inputs*
 ---
 - ***Related Types***:
   - **\<NodeKind\> Enum**:
@@ -22,6 +23,8 @@
     - **inputs**<sub>\<&'static [InputDesc]\></sub>  *- Array of **InputDesc**
     - **outputs**<sub>\<&'static [OutputDesc]\></sub> *- Array of **OutputDesc**
     - **process**<sub>\<fn(&[&DataValue], &[&mut DataValue]\></sub> *- Function which take inputs and sets outputs*
+  - **\<NodeUIState\>**:
+    - **position**<sub>\<(f32, f32)\></sub> *- Position of the node in the UI*
   - **\<InputDesc\>**:
     - **name**<sub>\<&'static str\></sub> *- Name of the Input Field*
     - **data_type**<sub>\<DataType\></sub> *- Data type of the Input Field*
@@ -65,3 +68,6 @@
 ## Graph Manager
 - **\<GraphManager\>**:
   - **graphs**<sub>\<Vec\<Graph\>\></sub> *- Vector owning graphs (graph id is index)*
+
+
+# Interface with Frontend

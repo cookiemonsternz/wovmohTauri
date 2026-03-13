@@ -10,7 +10,7 @@ impl GraphManager {
     }
 
     pub fn add_graph(&mut self) {
-        self.graphs.push(Graph::new());
+        self.graphs.push(Graph::new(self.graphs.len()));
     }
 
     pub fn get_graph(&self, id: GraphId) -> &Graph {

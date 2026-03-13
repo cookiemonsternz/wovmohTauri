@@ -1,7 +1,9 @@
 use super::*;
+use serde::Serialize;
+use std::cmp::PartialEq;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
-#[derive(Clone)]
+#[derive(Copy, Clone, Serialize)]
 pub enum DataType {
     Number,
     Boolean,
@@ -10,7 +12,8 @@ pub enum DataType {
     Point3,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Debug)]
+#[serde(tag = "type", content = "value")]
 pub enum DataValue {
     Number(f64),
     Boolean(bool),
@@ -168,6 +171,19 @@ impl Div for DataValue {
                 lhs: self.type_name(),
                 rhs: rhs.type_name(),
             }),
+        }
+    }
+}
+
+impl PartialEq for DataValue {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Number(l0), Self::Number(r0)) => l0 == r0,
+            (Self::Boolean(l0), Self::Boolean(r0)) => l0 == r0,
+            (Self::Color(l0), Self::Color(r0)) => l0 == r0,
+            (Self::Vector3(l0), Self::Vector3(r0)) => l0 == r0,
+            (Self::Point3(l0), Self::Point3(r0)) => l0 == r0,
+            _ => false,
         }
     }
 }

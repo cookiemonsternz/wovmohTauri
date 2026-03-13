@@ -1,4 +1,7 @@
-use crate::{core::input_field::InputId, core::node::NodeId, types::data_type::DataValue};
+use crate::{
+    core::{input_field::InputId, node::NodeId},
+    types::data_type::DataValue,
+};
 
 pub type OutputId = usize;
 
